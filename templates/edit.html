@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Editar Artículo &mdash; Inventario</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f1f5f9;color:#1e293b}
+header{background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+header h1{font-size:1.3rem;font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:.3rem;padding:.45rem 1rem;border-radius:6px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;text-decoration:none;transition:filter .15s}
+.btn:hover{filter:brightness(.88)}
+.btn-blue{background:#3b82f6;color:#fff}
+.btn-gray{background:#64748b;color:#fff}
+.container{max-width:740px;margin:2rem auto;padding:0 1.5rem}
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:1.5rem}
+.card h2{font-size:1rem;font-weight:700;color:#1e40af;margin-bottom:1.25rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.span2{grid-column:1/-1}
+.fg{display:flex;flex-direction:column;gap:.3rem}
+label{font-size:.77rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.3px}
+input{padding:.45rem .7rem;border:1.5px solid #cbd5e1;border-radius:6px;font-size:.9rem;transition:border-color .15s,box-shadow .15s}
+input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.form-actions{margin-top:1.25rem;display:flex;gap:.5rem}
+.meta{margin-top:1.25rem;padding-top:1rem;border-top:1px solid #e2e8f0;font-size:.73rem;color:#94a3b8;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <h1>Editar artículo</h1>
+  <a href="/" class="btn btn-gray">&#8592; Volver al inventario</a>
+</header>
+<div class="container">
+  <div class="card">
+    <h2>Modificar datos del artículo</h2>
+    <form method="POST" action="/items/update/{{.ID}}">
+      <div class="form-grid">
+        <div class="fg span2">
+          <label>Nombre *</label>
+          <input name="name" value="{{.Name}}" required>
+        </div>
+        <div class="fg">
+          <label>Categoría *</label>
+          <input name="category" value="{{.Category}}" required>
+        </div>
+        <div class="fg">
+          <label>Subcategoría</label>
+          <input name="subcategory" value="{{.Subcategory}}">
+        </div>
+        <div class="fg">
+          <label>Cantidad</label>
+          <input name="quantity" type="number" min="0" value="{{.Quantity}}">
+        </div>
+        <div class="fg">
+          <label>Precio unitario ($)</label>
+          <input name="price" type="number" step="0.01" min="0" value="{{printf "%.2f" .Price}}">
+        </div>
+        <div class="fg">
+          <label>Unidad</label>
+          <input name="unit" value="{{.Unit}}">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-blue">Guardar cambios</button>
+        <a href="/" class="btn btn-gray">Cancelar</a>
+      </div>
+    </form>
+    <div class="meta">
+      ID: {{.ID}}<br>
+      Creado: {{.CreatedAt}}<br>
+      Última modificación: {{.UpdatedAt}}
+    </div>
+  </div>
+</div>
+</body>
+</html>

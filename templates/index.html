@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestión de Inventario</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh}
+header{background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+header h1{font-size:1.3rem;font-weight:700;letter-spacing:.3px}
+.btn{display:inline-flex;align-items:center;gap:.3rem;padding:.45rem 1rem;border-radius:6px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;text-decoration:none;transition:filter .15s}
+.btn:hover{filter:brightness(.88)}
+.btn-blue{background:#3b82f6;color:#fff}
+.btn-green{background:#10b981;color:#fff}
+.btn-amber{background:#f59e0b;color:#fff}
+.btn-red{background:#ef4444;color:#fff}
+.btn-sm{padding:.25rem .6rem;font-size:.78rem}
+.container{max-width:1280px;margin:0 auto;padding:1.5rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat{background:#fff;border-radius:10px;padding:1rem 1.25rem;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid #3b82f6}
+.stat .v{font-size:1.6rem;font-weight:800;color:#1e40af}
+.stat .l{font-size:.73rem;color:#64748b;margin-top:.15rem;text-transform:uppercase;letter-spacing:.4px}
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:1.25rem;margin-bottom:1.5rem}
+.card h2{font-size:1rem;font-weight:700;color:#1e40af;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:.75rem}
+.fg{display:flex;flex-direction:column;gap:.3rem}
+label{font-size:.77rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.3px}
+input{padding:.42rem .65rem;border:1.5px solid #cbd5e1;border-radius:6px;font-size:.875rem;transition:border-color .15s,box-shadow .15s}
+input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+.form-actions{margin-top:1rem}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead tr{background:#eff6ff}
+th{padding:.65rem .8rem;text-align:left;font-weight:700;color:#1e40af;border-bottom:2px solid #bfdbfe;white-space:nowrap;font-size:.78rem;text-transform:uppercase;letter-spacing:.4px}
+td{padding:.55rem .8rem;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-block;padding:.15rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;background:#dbeafe;color:#1d4ed8}
+.badge-sub{background:#f0fdf4;color:#15803d}
+.actions{display:flex;gap:.35rem;align-items:center;flex-wrap:nowrap}
+.empty{text-align:center;padding:3rem 1rem;color:#94a3b8}
+.empty-icon{font-size:3rem;display:block;margin-bottom:.75rem}
+tfoot td{font-weight:700;background:#eff6ff;color:#1e40af;border-top:2px solid #bfdbfe}
+</style>
+</head>
+<body>
+<header>
+  <h1>Gestión de Inventario</h1>
+  <a href="/report" class="btn btn-green">&#8659; Descargar Informe XML</a>
+</header>
+<div class="container">
+
+  <div class="stats">
+    <div class="stat">
+      <div class="v">{{.TotalItems}}</div>
+      <div class="l">Artículos registrados</div>
+    </div>
+    <div class="stat">
+      <div class="v">$ {{printf "%.2f" .TotalValue}}</div>
+      <div class="l">Valor total del inventario</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Agregar artículo</h2>
+    <form method="POST" action="/items/create">
+      <div class="form-grid">
+        <div class="fg"><label>Nombre *</label><input name="name" required placeholder="Ej: Laptop Dell"></div>
+        <div class="fg"><label>Categoría *</label><input name="category" required placeholder="Ej: Electrónica"></div>
+        <div class="fg"><label>Subcategoría</label><input name="subcategory" placeholder="Ej: Computadoras"></div>
+        <div class="fg"><label>Cantidad</label><input name="quantity" type="number" min="0" value="1"></div>
+        <div class="fg"><label>Precio unitario ($)</label><input name="price" type="number" step="0.01" min="0" value="0.00"></div>
+        <div class="fg"><label>Unidad</label><input name="unit" placeholder="Ej: piezas, kg, lt"></div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-blue">&#43; Agregar artículo</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Inventario ({{.TotalItems}} artículo{{if ne .TotalItems 1}}s{{end}})</h2>
+    {{if .Items}}
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Subcategoría</th>
+          <th>Cantidad</th>
+          <th>Unidad</th>
+          <th>Precio unit.</th>
+          <th>Valor total</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+      {{range .Items}}
+      <tr>
+        <td><strong>{{.Name}}</strong></td>
+        <td><span class="badge">{{.Category}}</span></td>
+        <td>{{if .Subcategory}}<span class="badge badge-sub">{{.Subcategory}}</span>{{else}}&mdash;{{end}}</td>
+        <td>{{.Quantity}}</td>
+        <td>{{if .Unit}}{{.Unit}}{{else}}&mdash;{{end}}</td>
+        <td>$ {{printf "%.2f" .Price}}</td>
+        <td>$ {{itemValue .Quantity .Price}}</td>
+        <td>
+          <div class="actions">
+            <a href="/items/edit/{{.ID}}" class="btn btn-amber btn-sm">Editar</a>
+            <form method="POST" action="/items/delete/{{.ID}}" onsubmit="return confirm('¿Eliminar este artículo?')">
+              <button type="submit" class="btn btn-red btn-sm">Eliminar</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {{end}}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" style="text-align:right">Total del inventario:</td>
+          <td>$ {{printf "%.2f" .TotalValue}}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+    {{else}}
+    <div class="empty">
+      <span class="empty-icon">&#128230;</span>
+      No hay artículos registrados.<br>¡Agrega el primero usando el formulario de arriba!
+    </div>
+    {{end}}
+  </div>
+
+</div>
+</body>
+</html>
