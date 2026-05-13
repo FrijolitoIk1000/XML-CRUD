@@ -1,0 +1,10 @@
+# Binario compilado
+inventory.exe
+inventory
+
+# Datos de inventario (opcional: quitar si quieres versionar los datos)
+inventory.json
+
+# Archivos de Go
+*.test
+*.out
