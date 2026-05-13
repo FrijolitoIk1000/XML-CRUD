@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/FrijolitoIk1000/XML-CRUD/handler"
 	"github.com/FrijolitoIk1000/XML-CRUD/store"
@@ -14,12 +15,21 @@ import (
 var embeddedTemplates embed.FS
 
 func main() {
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		log.Fatal("DATABASE_URL no configurada")
+	}
+
+	s, err := store.New(dsn)
+	if err != nil {
+		log.Fatal("no se pudo conectar a la base de datos:", err)
+	}
+
 	tmplFS, err := fs.Sub(embeddedTemplates, "templates")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s := store.New("inventory.json")
 	h := handler.New(s, tmplFS)
 
 	mux := http.NewServeMux()
@@ -30,7 +40,11 @@ func main() {
 	mux.HandleFunc("/items/delete/", h.Delete)
 	mux.HandleFunc("/report", h.Report)
 
-	const addr = ":8080"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	addr := ":" + port
 	log.Printf("Servidor de inventario iniciado → http://localhost%s", addr)
 	log.Fatal(http.ListenAndServe(addr, mux))
 }
