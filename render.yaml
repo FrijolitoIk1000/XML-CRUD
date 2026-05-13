@@ -2,6 +2,7 @@ services:
   - type: web
     name: xml-crud
     env: go
+    plan: free
     buildCommand: go build -o server .
     startCommand: ./server
     envVars:
